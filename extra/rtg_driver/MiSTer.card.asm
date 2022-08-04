@@ -23,6 +23,8 @@
         include exec/exec.i
         include lvo/exec_lib.i
 
+        include Version.i
+
 ; If you define the Debug Symbol make sure the monitor file is in
 ; sys:storage/monitors - debug output seems to crash the system if
 ; it happens during startup.
@@ -160,7 +162,7 @@ MinimigCard:
         dc.b    'MiSTer.card',0,0
         dc.b    '$VER: '
 IDString:
-        dc.b    'MiSTer.card 0.1 (19.Oct.2020)',0
+        IDSTRING
         dc.b    0
 expansionLibName:
         dc.b    'expansion.library',0

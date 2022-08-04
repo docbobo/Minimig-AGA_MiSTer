@@ -1,0 +1,4 @@
+IDSTRING  MACRO
+          dc.b 'MiSTer.card @MiSTerRTGDriver_VERSION_MAJOR@.@MiSTerRTGDriver_VERSION_MINOR@ (@TODAY@)',0
+          ENDM
+

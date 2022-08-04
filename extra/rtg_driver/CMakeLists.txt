@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
-project("MiSTer RTG Driver" ASM)
+project(MiSTerRTGDriver VERSION 0.2 LANGUAGES ASM)
+
+string(TIMESTAMP TODAY "%Y-%m-%d")
+configure_file(Version.i.in Version.i)
 
 set(TARGET MiSTer.card)
 
