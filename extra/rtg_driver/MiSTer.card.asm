@@ -20,16 +20,12 @@
         include P96/P96ModeInfo.i
         include P96/P96CardStruct.i
 
-        include hardware/custom.i
-        include hardware/intbits.i
         include exec/exec.i
         include lvo/exec_lib.i
 
 ; If you define the Debug Symbol make sure the monitor file is in
 ; sys:storage/monitors - debug output seems to crash the system if
 ; it happens during startup.
-
-;debug
 
 ;HasBlitter
 ;blitterhistory
