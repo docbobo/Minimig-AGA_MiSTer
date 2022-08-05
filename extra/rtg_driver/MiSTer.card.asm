@@ -11,81 +11,78 @@
 ;
 ; This software is licensed under LPGLv2.1 ; see LICENSE file
 
-
+; 0.2 - Ported mmulib support from FPGAArcade driver.
 ; 0.1 - Cut down to the bare bones...
 
-        machine 68020
+            machine   68020
+            nolist
 
-        include P96/P96BoardInfo.i
-        include P96/P96ModeInfo.i
-        include P96/P96CardStruct.i
+            include   P96/P96BoardInfo.i
+            include   P96/P96ModeInfo.i
+            include   P96/P96CardStruct.i
 
-        include exec/exec.i
-        include lvo/exec_lib.i
+            include   exec/exec.i
+            include   lvo/exec_lib.i
 
-        include Version.i
-
-; If you define the Debug Symbol make sure the monitor file is in
-; sys:storage/monitors - debug output seems to crash the system if
-; it happens during startup.
+            include   Version.i
 
 ;HasBlitter
 ;blitterhistory
 ;HasSprite
 
 beacon:
-        move.l  #8191,d0
-.loop
-        move.w  d0,$dff180
-        dbf     d0,.loop
-        rts
+            move.l    #8191,d0
+.loop:
+            move.w    d0,$dff180
+            dbf       d0,.loop
+            rts
 
-BUG MACRO
-        IFD     debug
+BUG         MACRO
+            IFD       debug
 
-        ifnc    "","\9"
-        move.l  \9,-(sp)
-        endc
-        ifnc    "","\8"
-        move.l  \8,-(sp)
-        endc
-        ifnc    "","\7"
-        move.l  \7,-(sp)
-        endc
-        ifnc    "","\6"
-        move.l  \6,-(sp)
-        endc
-        ifnc    "","\5"
-        move.l  \5,-(sp)
-        endc
-        ifnc    "","\4"
-        move.l  \4,-(sp)
-        endc
-        ifnc    "","\3"
-        move.l  \3,-(sp)
-        endc
-        ifnc    "","\2"
-        move.l  \2,-(sp)
-        endc
+            ifnc      "","\9"
+            move.l    \9,-(sp)
+            endc
+            ifnc      "","\8"
+            move.l    \8,-(sp)
+            endc
+            ifnc      "","\7"
+            move.l    \7,-(sp)
+            endc
+            ifnc      "","\6"
+            move.l    \6,-(sp)
+            endc
+            ifnc      "","\5"
+            move.l    \5,-(sp)
+            endc
+            ifnc      "","\4"
+            move.l    \4,-(sp)
+            endc
+            ifnc      "","\3"
+            move.l    \3,-(sp)
+            endc
+            ifnc      "","\2"
+            move.l    \2,-(sp)
+            endc
 
-        jsr     bugprintf
+            jsr       bugprintf
 
-        dc.b    \1,$d,$a,0
-        even
+            dc.b      \1,$d,$a,0
+            even
 
-        adda.w  #(NARG-1)*4,sp
+            adda.w    #(NARG-1)*4,sp
 
-        ENDC
-        ENDM
+            ENDC
+            ENDM
 
 ****************************************************************************
 ;       section ReplayRTG,code
 ****************************************************************************
-MEMORY_SIZE   EQU $800000   ; 8MB framebuffer
-MEMORY_BASE   EQU $02000000
-REGISTER_BASE EQU $b80100
+MEMORY_SIZE EQU       $800000                   ; 8MB framebuffer
+MEMORY_BASE EQU       $02000000
+REGISTER_BASE EQU     $b80100
 
-FB_BASE EQU $27000000 ; MiSTer physical memory address
+FB_BASE     EQU       $27000000                 ; MiSTer physical memory address
 
 ; B80100:B80101 :  8:0 : ADDR[24:16]
 ; B80102:B80103 : 15:0 : ADDR[15:0]
@@ -98,101 +95,101 @@ FB_BASE EQU $27000000 ; MiSTer physical memory address
 
 ; B80400..B807FF CLUT : 256 * 32bits 00 / RR / GG / BB
 
-REG_ADDRESS EQU 0
-REG_FORMAT  EQU 4
-REG_ENABLE  EQU 6
-REG_HSIZE   EQU 8
-REG_VSIZE   EQU 10
-REG_STRIDE  EQU 12
-REG_ID      EQU 14
-REG_PALETTE EQU $300
+REG_ADDRESS EQU       0
+REG_FORMAT  EQU       4
+REG_ENABLE  EQU       6
+REG_HSIZE   EQU       8
+REG_VSIZE   EQU       10
+REG_STRIDE  EQU       12
+REG_ID      EQU       14
+REG_PALETTE EQU       $300
 
 ;------------------------------------------------------------------------------
 ProgStart:
 ;------------------------------------------------------------------------------
 
-        moveq   #-1,d0
-        rts
+            moveq     #-1,d0
+            rts
 
-        IFD     debug
-        bra.b   _bugprintf_end
+            IFD       debug
+            bra.b     _bugprintf_end
 bugprintf:
-        movem.l d0-d1/a0-a3/a6,-(sp)
-        move.l  $4.w,a6
-        move.l  28(sp),a0
-        lea     32(sp),a1
-        lea     .putch(pc),a2
-        move.l  a6,a3
-        jsr     beacon
-        jsr     -522(a6)                ; _LVORawDoFmt
+            movem.l   d0-d1/a0-a3/a6,-(sp)
+            move.l    $4.w,a6
+            move.l    28(sp),a0
+            lea       32(sp),a1
+            lea       .putch(pc),a2
+            move.l    a6,a3
+            jsr       beacon
+            jsr       -522(a6)                  ; _LVORawDoFmt
 
-.skip   move.l  28(sp),a0
-.end:   move.b  (a0)+,d0
-        bne.b   .end
-        move.l  a0,d0
-        addq.l  #1,d0
-        and.l   #$fffffffe,d0
-        move.l  d0,28(sp)
-        movem.l (sp)+,d0-d1/a0-a3/a6
-        rts
+.skip:      move.l    28(sp),a0
+.end:       move.b    (a0)+,d0
+            bne.b     .end
+            move.l    a0,d0
+            addq.l    #1,d0
+            and.l     #$fffffffe,d0
+            move.l    d0,28(sp)
+            movem.l   (sp)+,d0-d1/a0-a3/a6
+            rts
 
-.putch: move.l  a3,a6
-        jmp     -516(a6)                ; _LVORawPutChar (execPrivate9)
+.putch:     move.l    a3,a6
+            jmp       -516(a6)                  ; _LVORawPutChar (execPrivate9)
 _bugprintf_end:
-        rts
-        ENDC
+            rts
+            ENDC
 
 ;------------------------------------------------------------------------------
 RomTag:
 ;------------------------------------------------------------------------------
 
-        dc.w    RTC_MATCHWORD
-        dc.l    RomTag
-        dc.l    ProgEnd
-        dc.b    RTF_AUTOINIT    ;RT_FLAGS
-        dc.b    1               ;RT_VERSION
-        dc.b    NT_LIBRARY      ;RT_TYPE
-        dc.b    0               ;RT_PRI
-        dc.l    MinimigCard
-        dc.l    IDString
-        dc.l    InitTable
+            dc.w      RTC_MATCHWORD
+            dc.l      RomTag
+            dc.l      ProgEnd
+            dc.b      RTF_AUTOINIT              ;RT_FLAGS
+            dc.b      1                         ;RT_VERSION
+            dc.b      NT_LIBRARY                ;RT_TYPE
+            dc.b      0                         ;RT_PRI
+            dc.l      MinimigCard
+            dc.l      IDString
+            dc.l      InitTable
 CardName:
-        dc.b    'MiSTer',0
+            dc.b      "MiSTer",0
 MinimigCard:
-        dc.b    'MiSTer.card',0,0
-        dc.b    '$VER: '
+            dc.b      "MiSTer.card",0,0
+            dc.b      "$VER: "
 IDString:
-        IDSTRING
-        dc.b    0
+            IDSTRING
+            dc.b      0
 expansionLibName:
-        dc.b    'expansion.library',0
+            dc.b      "expansion.library",0
 intuitionLibName:
-        dc.b    'intuition.library',0
-        cnop    0,4
+            dc.b      "intuition.library",0
+            cnop      0,4
 
 InitTable:
-        dc.l    CARD_SIZEOF     ;DataSize
-        dc.l    FuncTable       ;FunctionTable
-        dc.l    DataTable       ;DataTable
-        dc.l    InitRoutine
+            dc.l      CARD_SIZEOF               ;DataSize
+            dc.l      FuncTable                 ;FunctionTable
+            dc.l      DataTable                 ;DataTable
+            dc.l      InitRoutine
 FuncTable:
-        dc.l    Open
-        dc.l    Close
-        dc.l    Expunge
-        dc.l    ExtFunc
-        dc.l    FindCard
-        dc.l    InitCard
-        dc.l    -1
+            dc.l      Open
+            dc.l      Close
+            dc.l      Expunge
+            dc.l      ExtFunc
+            dc.l      FindCard
+            dc.l      InitCard
+            dc.l      -1
 DataTable:
-        INITBYTE        LN_TYPE,NT_LIBRARY
-        INITBYTE        LN_PRI,206
-        INITLONG        LN_NAME,MinimigCard
-        INITBYTE        LIB_FLAGS,LIBF_SUMUSED|LIBF_CHANGED
-        INITWORD        LIB_VERSION,1
-        INITWORD        LIB_REVISION,0
-        INITLONG        LIB_IDSTRING,IDString
-        INITLONG        CARD_NAME,CardName
-        dc.w            0,0
+            INITBYTE  LN_TYPE,NT_LIBRARY
+            INITBYTE  LN_PRI,206
+            INITLONG  LN_NAME,MinimigCard
+            INITBYTE  LIB_FLAGS,LIBF_SUMUSED|LIBF_CHANGED
+            INITWORD  LIB_VERSION,1
+            INITWORD  LIB_REVISION,0
+            INITLONG  LIB_IDSTRING,IDString
+            INITLONG  CARD_NAME,CardName
+            dc.w      0,0
 
 ;------------------------------------------------------------------------------
 InitRoutine:
@@ -200,112 +197,112 @@ InitRoutine:
 
 ;       BUG "Minimig.card InitRoutine()"
 
-        movem.l a5,-(sp)
-        movea.l d0,a5
-        move.l  a6,CARD_EXECBASE(a5)
-        move.l  a0,CARD_SEGMENTLIST(a5)
-        lea     expansionLibName(pc),a1
-        moveq   #0,d0
-        jsr     _LVOOpenLibrary(a6)
+            movem.l   a5,-(sp)
+            movea.l   d0,a5
+            move.l    a6,CARD_EXECBASE(a5)
+            move.l    a0,CARD_SEGMENTLIST(a5)
+            lea       expansionLibName(pc),a1
+            moveq     #0,d0
+            jsr       _LVOOpenLibrary(a6)
 
-        move.l  d0,CARD_EXPANSIONBASE(a5)
-        beq.s   .fail
+            move.l    d0,CARD_EXPANSIONBASE(a5)
+            beq.s     .fail
 
-        lea     intuitionLibName(pc),a1
-        moveq   #0,d0
-        jsr     _LVOOpenLibrary(a6)
-        move.l  d0,CARD_INTUITIONBASE(a5)
-        bne.s   .exit
+            lea       intuitionLibName(pc),a1
+            moveq     #0,d0
+            jsr       _LVOOpenLibrary(a6)
+            move.l    d0,CARD_INTUITIONBASE(a5)
+            bne.s     .exit
 
-.fail
-        movem.l d7/a5/a6,-(sp)
-        move.l  #(AT_Recovery|AG_OpenLib|AO_ExpansionLib),d7
-        movea.l $4.w,a6
-        jsr     _LVOAlert(a6)
+.fail:
+            movem.l   d7/a5/a6,-(sp)
+            move.l    #(AT_Recovery|AG_OpenLib|AO_ExpansionLib),d7
+            movea.l   $4.w,a6
+            jsr       _LVOAlert(a6)
 
-        movem.l (sp)+,d7/a5/a6
+            movem.l   (sp)+,d7/a5/a6
 .exit:
-        move.l  a5,d0
-        movem.l (sp)+,a5
-        rts
+            move.l    a5,d0
+            movem.l   (sp)+,a5
+            rts
 
 ;------------------------------------------------------------------------------
 Open:
 ;------------------------------------------------------------------------------
 
-        addq.w  #1,LIB_OPENCNT(a6)
-        bclr    #3,CARD_FLAGS(a6)
+            addq.w    #1,LIB_OPENCNT(a6)
+            bclr      #3,CARD_FLAGS(a6)
 
-        IFD blitterhistory
-        move.l  a0,-(sp)
-        lea     $80000,a0
-        moveq.l #16,d0
+            IFD       blitterhistory
+            move.l    a0,-(sp)
+            lea       $80000,a0
+            moveq.l   #16,d0
 .fill:
-        clr.l   (a0)+
-        dbra    d0,.fill
+            clr.l     (a0)+
+            dbra      d0,.fill
 
-        move.l  (sp)+,a0
-        ENDC
+            move.l    (sp)+,a0
+            ENDC
 
-        move.l  a6,d0
-        rts
+            move.l    a6,d0
+            rts
 
 ;------------------------------------------------------------------------------
 Close:
 ;------------------------------------------------------------------------------
 
-        moveq   #0,d0
-        subq.w  #1,LIB_OPENCNT(a6)
-        bne.b   .exit
+            moveq     #0,d0
+            subq.w    #1,LIB_OPENCNT(a6)
+            bne.b     .exit
 
-        btst    #3,CARD_FLAGS(a6)
-        beq.b   .exit
+            btst      #3,CARD_FLAGS(a6)
+            beq.b     .exit
 
-        bsr.b   Expunge
+            bsr.b     Expunge
 
 .exit:
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 Expunge:
 ;------------------------------------------------------------------------------
 
-        movem.l d2/a5/a6,-(sp)
-        movea.l a6,a5
-        movea.l CARD_EXECBASE(a5),a6
-        tst.w   LIB_OPENCNT(a5)
-        beq.b   .remove
+            movem.l   d2/a5/a6,-(sp)
+            movea.l   a6,a5
+            movea.l   CARD_EXECBASE(a5),a6
+            tst.w     LIB_OPENCNT(a5)
+            beq.b     .remove
 
-        bset    #3,CARD_FLAGS(a5)
-        moveq   #0,d0
-        bra.b   .exit
+            bset      #3,CARD_FLAGS(a5)
+            moveq     #0,d0
+            bra.b     .exit
 
 .remove:
-        move.l  CARD_SEGMENTLIST(a5),d2
-        movea.l a5,a1
-        jsr     _LVORemove(a6)
+            move.l    CARD_SEGMENTLIST(a5),d2
+            movea.l   a5,a1
+            jsr       _LVORemove(a6)
 
-        movea.l CARD_EXPANSIONBASE(a5),a1
-        jsr     _LVOCloseLibrary(a6)
+            movea.l   CARD_EXPANSIONBASE(a5),a1
+            jsr       _LVOCloseLibrary(a6)
 
-        moveq   #0,d0
-        movea.l a5,a1
-        move.w  LIB_NEGSIZE(a5),d0
-        suba.l  d0,a1
-        add.w   LIB_POSSIZE(a5),d0
-        jsr     _LVOFreeMem(a6)
+            moveq     #0,d0
+            movea.l   a5,a1
+            move.w    LIB_NEGSIZE(a5),d0
+            suba.l    d0,a1
+            add.w     LIB_POSSIZE(a5),d0
+            jsr       _LVOFreeMem(a6)
 
-        move.l  d2,d0
+            move.l    d2,d0
 .exit:
-        movem.l (sp)+,d2/a5/a6
-        rts
+            movem.l   (sp)+,d2/a5/a6
+            rts
 
 ;------------------------------------------------------------------------------
 ExtFunc:
 ;------------------------------------------------------------------------------
 
-        moveq   #0,d0
-        rts
+            moveq     #0,d0
+            rts
 
 ;------------------------------------------------------------------------------
 FindCard:
@@ -325,120 +322,120 @@ FindCard:
 ;  BoardInfo struct supplied by the caller, the rtg.library, for example
 ;  the MemoryBase, MemorySize and RegisterBase fields.
 
-        move.l  #MEMORY_SIZE  ,PSSO_BoardInfo_MemorySize(a0)
-        move.l  #REGISTER_BASE,PSSO_BoardInfo_RegisterBase(a0)
-        move.l  #MEMORY_BASE  ,PSSO_BoardInfo_MemoryBase(a0)
+            move.l    #MEMORY_SIZE,PSSO_BoardInfo_MemorySize(a0)
+            move.l    #REGISTER_BASE,PSSO_BoardInfo_RegisterBase(a0)
+            move.l    #MEMORY_BASE,PSSO_BoardInfo_MemoryBase(a0)
         
-        moveq   #-1,d0
-        rts
+            moveq     #-1,d0
+            rts
 
 ;------------------------------------------------------------------------------
 InitCard:
 ;------------------------------------------------------------------------------
 ;  a0:  struct BoardInfo
 
-        movem.l a2/a5/a6,-(sp)
-        movea.l a0,a2
+            movem.l   a2/a5/a6,-(sp)
+            movea.l   a0,a2
 
-        lea     CardName(pc),a1
-        move.l  a1,PSSO_BoardInfo_BoardName(a2)
-        move.l  #10,PSSO_BoardInfo_BoardType(a2)
-        move.l  #0,PSSO_BoardInfo_GraphicsControllerType(a2)
-        move.l  #0,PSSO_BoardInfo_PaletteChipType(a2)
+            lea       CardName(pc),a1
+            move.l    a1,PSSO_BoardInfo_BoardName(a2)
+            move.l    #10,PSSO_BoardInfo_BoardType(a2)
+            move.l    #0,PSSO_BoardInfo_GraphicsControllerType(a2)
+            move.l    #0,PSSO_BoardInfo_PaletteChipType(a2)
 
-        ori.w   #2,PSSO_BoardInfo_RGBFormats(a2)   ; CLUT
-        ori.w   #8,PSSO_BoardInfo_RGBFormats(a2)   ; RGBFB_B8G8R8
-        ori.w   #16,PSSO_BoardInfo_RGBFormats(a2)  ; RGBFB_R5G6B5PC 
-        ori.w   #256,PSSO_BoardInfo_RGBFormats(a2) ; RGBFB_R8G8B8A8
+            ori.w     #2,PSSO_BoardInfo_RGBFormats(a2) ; CLUT
+            ori.w     #8,PSSO_BoardInfo_RGBFormats(a2) ; RGBFB_B8G8R8
+            ori.w     #16,PSSO_BoardInfo_RGBFormats(a2) ; RGBFB_R5G6B5PC 
+            ori.w     #256,PSSO_BoardInfo_RGBFormats(a2) ; RGBFB_R8G8B8A8
         
-        move.w  #8,PSSO_BoardInfo_BitsPerCannon(a2)
-        move.l  #MEMORY_SIZE-$40000,PSSO_BoardInfo_MemorySpaceSize(a2)
-        move.l  PSSO_BoardInfo_MemoryBase(a2),d0
-        move.l  d0,PSSO_BoardInfo_MemorySpaceBase(a2)
-        addi.l  #MEMORY_SIZE-$4000,d0
-        move.l  d0,PSSO_BoardInfo_MouseSaveBuffer(a2)
+            move.w    #8,PSSO_BoardInfo_BitsPerCannon(a2)
+            move.l    #MEMORY_SIZE-$40000,PSSO_BoardInfo_MemorySpaceSize(a2)
+            move.l    PSSO_BoardInfo_MemoryBase(a2),d0
+            move.l    d0,PSSO_BoardInfo_MemorySpaceBase(a2)
+            addi.l    #MEMORY_SIZE-$4000,d0
+            move.l    d0,PSSO_BoardInfo_MouseSaveBuffer(a2)
         
-        ori.l   #(1<<20),PSSO_BoardInfo_Flags(a2)       ; BIF_INDISPLAYCHAIN
-        ;ori.l   #(1<<1),PSSO_BoardInfo_Flags(a2)        ; BIF_NOMEMORYMODEMIX
+            ori.l     #(1<<20),PSSO_BoardInfo_Flags(a2) ; BIF_INDISPLAYCHAIN
+            ;ori.l   #(1<<1),PSSO_BoardInfo_Flags(a2)        ; BIF_NOMEMORYMODEMIX
 
-        lea     SetSwitch(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetSwitch(a2)
-        lea     SetDAC(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetDAC(a2)
-        lea     SetGC(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetGC(a2)
-        lea     SetPanning(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetPanning(a2)
-        lea     CalculateBytesPerRow(pc),a1
-        move.l  a1,PSSO_BoardInfo_CalculateBytesPerRow(a2)
-        lea     CalculateMemory(pc),a1
-        move.l  a1,PSSO_BoardInfo_CalculateMemory(a2)
-        lea     GetCompatibleFormats(pc),a1
-        move.l  a1,PSSO_BoardInfo_GetCompatibleFormats(a2)
-        lea     SetColorArray(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetColorArray(a2)
-        lea     SetDPMSLevel(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetDPMSLevel(a2)
-        lea     SetDisplay(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetDisplay(a2)
-        lea     SetMemoryMode(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetMemoryMode(a2)
-        lea     SetWriteMask(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetWriteMask(a2)
-        lea     SetReadPlane(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetReadPlane(a2)
-        lea     SetClearMask(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetClearMask(a2)
-        lea     WaitVerticalSync(pc),a1
-        move.l  a1,PSSO_BoardInfo_WaitVerticalSync(a2)
+            lea       SetSwitch(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetSwitch(a2)
+            lea       SetDAC(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetDAC(a2)
+            lea       SetGC(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetGC(a2)
+            lea       SetPanning(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetPanning(a2)
+            lea       CalculateBytesPerRow(pc),a1
+            move.l    a1,PSSO_BoardInfo_CalculateBytesPerRow(a2)
+            lea       CalculateMemory(pc),a1
+            move.l    a1,PSSO_BoardInfo_CalculateMemory(a2)
+            lea       GetCompatibleFormats(pc),a1
+            move.l    a1,PSSO_BoardInfo_GetCompatibleFormats(a2)
+            lea       SetColorArray(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetColorArray(a2)
+            lea       SetDPMSLevel(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetDPMSLevel(a2)
+            lea       SetDisplay(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetDisplay(a2)
+            lea       SetMemoryMode(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetMemoryMode(a2)
+            lea       SetWriteMask(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetWriteMask(a2)
+            lea       SetReadPlane(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetReadPlane(a2)
+            lea       SetClearMask(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetClearMask(a2)
+            lea       WaitVerticalSync(pc),a1
+            move.l    a1,PSSO_BoardInfo_WaitVerticalSync(a2)
 ;       lea     (Reserved5,pc),a1
 ;       move.l  a1,(PSSO_BoardInfo_Reserved5,a2)
-        lea     SetClock(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetClock(a2)
-        lea     ResolvePixelClock(pc),a1
-        move.l  a1,PSSO_BoardInfo_ResolvePixelClock(a2)
-        lea     GetPixelClock(pc),a1
-        move.l  a1,PSSO_BoardInfo_GetPixelClock(a2)
+            lea       SetClock(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetClock(a2)
+            lea       ResolvePixelClock(pc),a1
+            move.l    a1,PSSO_BoardInfo_ResolvePixelClock(a2)
+            lea       GetPixelClock(pc),a1
+            move.l    a1,PSSO_BoardInfo_GetPixelClock(a2)
 
 ;        lea     AllocCardMem(pc),a1
 ;        move.l  a1,PSSO_BoardInfo_AllocCardMem(a2)
 ;        lea     FreeCardMem(pc),a1
 ;        move.l  a1,PSSO_BoardInfo_FreeCardMem(a2)
 
-        move.l  #113440000,PSSO_BoardInfo_MemoryClock(a2)
+            move.l    #113440000,PSSO_BoardInfo_MemoryClock(a2)
 
-        move.l  #1,(PSSO_BoardInfo_PixelClockCount+0,a2)
-        move.l  #1,(PSSO_BoardInfo_PixelClockCount+4,a2)
-        move.l  #1,(PSSO_BoardInfo_PixelClockCount+8,a2)
-        move.l  #1,(PSSO_BoardInfo_PixelClockCount+12,a2)
-        move.l  #1,(PSSO_BoardInfo_PixelClockCount+16,a2)
+            move.l    #1,(PSSO_BoardInfo_PixelClockCount+0,a2)
+            move.l    #1,(PSSO_BoardInfo_PixelClockCount+4,a2)
+            move.l    #1,(PSSO_BoardInfo_PixelClockCount+8,a2)
+            move.l    #1,(PSSO_BoardInfo_PixelClockCount+12,a2)
+            move.l    #1,(PSSO_BoardInfo_PixelClockCount+16,a2)
 ;- Planar
 ;- Chunky
 ;- HiColor
 ;- Truecolor
 ;- Truecolor + Alpha
 
-        move.w  #4095,(PSSO_BoardInfo_MaxHorValue+0,a2)
-        move.w  #4095,(PSSO_BoardInfo_MaxVerValue+0,a2)
-        move.w  #4095,(PSSO_BoardInfo_MaxHorValue+2,a2)
-        move.w  #4095,(PSSO_BoardInfo_MaxVerValue+2,a2)
-        move.w  #4095,(PSSO_BoardInfo_MaxHorValue+4,a2)
-        move.w  #4095,(PSSO_BoardInfo_MaxVerValue+4,a2)
-        move.w  #4095,(PSSO_BoardInfo_MaxHorValue+6,a2)
-        move.w  #4095,(PSSO_BoardInfo_MaxVerValue+6,a2)
-        move.w  #4095,(PSSO_BoardInfo_MaxHorValue+8,a2)
-        move.w  #4095,(PSSO_BoardInfo_MaxVerValue+8,a2)
+            move.w    #4095,(PSSO_BoardInfo_MaxHorValue+0,a2)
+            move.w    #4095,(PSSO_BoardInfo_MaxVerValue+0,a2)
+            move.w    #4095,(PSSO_BoardInfo_MaxHorValue+2,a2)
+            move.w    #4095,(PSSO_BoardInfo_MaxVerValue+2,a2)
+            move.w    #4095,(PSSO_BoardInfo_MaxHorValue+4,a2)
+            move.w    #4095,(PSSO_BoardInfo_MaxVerValue+4,a2)
+            move.w    #4095,(PSSO_BoardInfo_MaxHorValue+6,a2)
+            move.w    #4095,(PSSO_BoardInfo_MaxVerValue+6,a2)
+            move.w    #4095,(PSSO_BoardInfo_MaxHorValue+8,a2)
+            move.w    #4095,(PSSO_BoardInfo_MaxVerValue+8,a2)
 
-        move.w  #2048,(PSSO_BoardInfo_MaxHorResolution+0,a2)
-        move.w  #2048,(PSSO_BoardInfo_MaxVerResolution+0,a2)
-        move.w  #2048,(PSSO_BoardInfo_MaxHorResolution+2,a2)
-        move.w  #2048,(PSSO_BoardInfo_MaxVerResolution+2,a2)
-        move.w  #2048,(PSSO_BoardInfo_MaxHorResolution+4,a2)
-        move.w  #2048,(PSSO_BoardInfo_MaxVerResolution+4,a2)
-        move.w  #2048,(PSSO_BoardInfo_MaxHorResolution+6,a2)
-        move.w  #2048,(PSSO_BoardInfo_MaxVerResolution+6,a2)
-        move.w  #2048,(PSSO_BoardInfo_MaxHorResolution+8,a2)
-        move.w  #2048,(PSSO_BoardInfo_MaxVerResolution+8,a2)
+            move.w    #2048,(PSSO_BoardInfo_MaxHorResolution+0,a2)
+            move.w    #2048,(PSSO_BoardInfo_MaxVerResolution+0,a2)
+            move.w    #2048,(PSSO_BoardInfo_MaxHorResolution+2,a2)
+            move.w    #2048,(PSSO_BoardInfo_MaxVerResolution+2,a2)
+            move.w    #2048,(PSSO_BoardInfo_MaxHorResolution+4,a2)
+            move.w    #2048,(PSSO_BoardInfo_MaxVerResolution+4,a2)
+            move.w    #2048,(PSSO_BoardInfo_MaxHorResolution+6,a2)
+            move.w    #2048,(PSSO_BoardInfo_MaxVerResolution+6,a2)
+            move.w    #2048,(PSSO_BoardInfo_MaxHorResolution+8,a2)
+            move.w    #2048,(PSSO_BoardInfo_MaxVerResolution+8,a2)
 
 ;        lea     PSSO_BoardInfo_HardInterrupt(a2),a1
 ;        lea     VBL_ISR(pc),a0
@@ -452,38 +449,49 @@ InitCard:
 ;       lea     SetInterrupt(pc),a1
 ;       move.l  a1,PSSO_BoardInfo_SetInterrupt(a2)
 
-        IFD     HasBlitter
-        ori.l   #(1<<15),PSSO_BoardInfo_Flags(a2)       ; BIF_BLITTER
-        lea     BlitRectNoMaskComplete(pc),a1
-        move.l  a1,PSSO_BoardInfo_BlitRectNoMaskComplete(a2)
-        lea     BlitRect(pc),a1
-        move.l  a1,PSSO_BoardInfo_BlitRect(a2)
-        lea     WaitBlitter(pc),a1
-        move.l  a1,PSSO_BoardInfo_WaitBlitter(a2)
-        ENDC
+            IFD       HasBlitter
+            ori.l     #(1<<15),PSSO_BoardInfo_Flags(a2) ; BIF_BLITTER
+            lea       BlitRectNoMaskComplete(pc),a1
+            move.l    a1,PSSO_BoardInfo_BlitRectNoMaskComplete(a2)
+            lea       BlitRect(pc),a1
+            move.l    a1,PSSO_BoardInfo_BlitRect(a2)
+            lea       WaitBlitter(pc),a1
+            move.l    a1,PSSO_BoardInfo_WaitBlitter(a2)
+            ENDC
 
-        IFD     HasSprite
-        ori.l   #(1<<0),PSSO_BoardInfo_Flags(a2)        ; BIF_HARDWARESPRITE
-        lea     SetSprite(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetSprite(a2)
-        lea     SetSpritePosition(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetSpritePosition(a2)
-        lea     SetSpriteImage(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetSpriteImage(a2)
-        lea     SetSpriteColor(pc),a1
-        move.l  a1,PSSO_BoardInfo_SetSpriteColor(a2)
-        ENDC
+            IFD       HasSprite
+            ori.l     #(1<<0),PSSO_BoardInfo_Flags(a2) ; BIF_HARDWARESPRITE
+            lea       SetSprite(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetSprite(a2)
+            lea       SetSpritePosition(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetSpritePosition(a2)
+            lea       SetSpriteImage(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetSpriteImage(a2)
+            lea       SetSpriteColor(pc),a1
+            move.l    a1,PSSO_BoardInfo_SetSpriteColor(a2)
+            ENDC
 
-        ori.l   #(1<<3),PSSO_BoardInfo_Flags(a2)        ; BIF_CACHEMODECHANGE
-        move.l  PSSO_BoardInfo_MemoryBase(a2),(PSSO_BoardInfo_MemorySpaceBase,a2)
-        move.l  PSSO_BoardInfo_MemorySize(a2),(PSSO_BoardInfo_MemorySpaceSize,a2)
+;       Try to set memory region MMU flags via mmu.library first
+            move.l    PSSO_BoardInfo_MemoryBase(a2),a0
+            move.l    PSSO_BoardInfo_MemorySize(a2),d0
+            move.l    #MAPP_CACHEINHIBIT|MAPP_IMPRECISE|MAPP_NONSERIALIZED,d1
+            move.l    PSSO_BoardInfo_ExecBase(a2),a6
+            bsr.w     SetMMU
+            cmp.l     #-1,d0
+            bne.b     .skip
+        
+;       mmu.library failed - let's try with the P96 flags
+            ori.l     #(1<<3),PSSO_BoardInfo_Flags(a2) ; BIF_CACHEMODECHANGE
+.skip:
+            move.l    PSSO_BoardInfo_MemoryBase(a2),(PSSO_BoardInfo_MemorySpaceBase,a2)
+            move.l    PSSO_BoardInfo_MemorySize(a2),(PSSO_BoardInfo_MemorySpaceSize,a2)
 
-        movea.l PSSO_BoardInfo_RegisterBase(a2),a0
+            movea.l   PSSO_BoardInfo_RegisterBase(a2),a0
 
-        moveq   #-1,d0
+            moveq     #-1,d0
 .exit:
-        movem.l (sp)+,a2/a5/a6
-        rts
+            movem.l   (sp)+,a2/a5/a6
+            rts
 
 ;------------------------------------------------------------------------------
 SetSwitch:
@@ -498,27 +506,27 @@ SetSwitch:
 ;
 ;  NOTE: Return the opposite of the switch-state. BDK
 
-        move.w  PSSO_BoardInfo_MoniSwitch(a0),d1
-        andi.w  #$FFFE,d1
-        tst.b   d0
-        beq.b   .off
+            move.w    PSSO_BoardInfo_MoniSwitch(a0),d1
+            andi.w    #$FFFE,d1
+            tst.b     d0
+            beq.b     .off
 
-        ori.w   #$0001,d1
+            ori.w     #$0001,d1
 .off:
-        move.w  PSSO_BoardInfo_MoniSwitch(a0),d0
-        cmp.w   d0,d1
-        beq.b   .done
+            move.w    PSSO_BoardInfo_MoniSwitch(a0),d0
+            cmp.w     d0,d1
+            beq.b     .done
 
-        move.w  d1,PSSO_BoardInfo_MoniSwitch(a0)
+            move.w    d1,PSSO_BoardInfo_MoniSwitch(a0)
 
-        andi.l  #$1,d1
-        movea.l PSSO_BoardInfo_RegisterBase(a0),a0
-        move.w  d1,REG_ENABLE(a0)
-        BUG     "RTG:DisplaySwitch = %lx",d1
+            andi.l    #$1,d1
+            movea.l   PSSO_BoardInfo_RegisterBase(a0),a0
+            move.w    d1,REG_ENABLE(a0)
+            BUG       "RTG:DisplaySwitch = %lx",d1
 .done:
-    ;   bsr.w   SetInterrupt
-        andi.w  #$0001,d0
-        rts
+;   bsr.w   SetInterrupt
+            andi.w    #$0001,d0
+            rts
 
 ;------------------------------------------------------------------------------
 SetDAC:
@@ -529,11 +537,11 @@ SetDAC:
 ;  e.g. from chunky to TrueColor. Usually, all you have to do is to set
 ;  the RAMDAC of your board accordingly.
 
-        movea.l PSSO_BoardInfo_RegisterBase(a0),a0
-        move.w  .setdac_Format(pc,d7.l*2),d0
-        move.w  d0,REG_FORMAT(a0)
-        BUG     "RTG:DisplayFormat = %lx",d0
-        rts
+            movea.l   PSSO_BoardInfo_RegisterBase(a0),a0
+            move.w    .setdac_Format(pc,d7.l*2),d0
+            move.w    d0,REG_FORMAT(a0)
+            BUG       "RTG:DisplayFormat = %lx",d0
+            rts
 
 ;  [2:0] : 011=8bpp(palette) 100=16bpp 101=24bpp 110=32bpp
 ;  [3]   : 0=16bits 565 1=16bits 1555
@@ -541,20 +549,20 @@ SetDAC:
 ;  [5]   : Swap Bytes
 
 .setdac_Format:
-        dc.w    3          ;  1    RGBFB_NONE      planar mode (the name is historical)
-        dc.w    3      +32 ;+ 2    RGBFB_CLUT      palette mode, set colors when opening screen using tags or use SetRGB32/LoadRGB32(...)
-        dc.w    5          ;  4    RGBFB_R8G8B8    TrueColor RGB (8 bit each)
-        dc.w    5   +16+32 ;+ 8    RGBFB_B8G8R8    TrueColor BGR (8 bit each)
-        dc.w    4   +16+32 ;+ 16   RGBFB_R5G6B5PC  HiColor16 (5 bit R, 6 bit G, 5 bit B), format: gggbbbbbrrrrrggg
-        dc.w    4 +8       ;  32   RGBFB_R5G5B5PC  HiColor15 (5 bit each), format: gggbbbbb0rrrrrgg
-        dc.w    6          ;  64   RGBFB_A8R8G8B8  4 Byte TrueColor ARGB (A unused alpha channel)
-        dc.w    6   +16    ;  128  RGBFB_A8B8G8R8  4 Byte TrueColor ABGR (A unused alpha channel)
-        dc.w    6      +32 ;+ 256  RGBFB_R8G8B8A8  4 Byte TrueColor RGBA (A unused alpha channel)
-        dc.w    6   +16    ;  512  RGBFB_B8G8R8A8  4 Byte TrueColor BGRA (A unused alpha channel)
-        dc.w    4          ;  1024 RGBFB_R5G6B5    HiColor16 (5 bit R, 6 bit G, 5 bit B), format: rrrrrggggggbbbbb
-        dc.w    4 +8       ;  2048 RGBFB_R5G5B5    HiColor15 (5 bit each), format: 0rrrrrgggggbbbbb
-        dc.w    4          ;  4096 RGBFB_B5G6R5PC  HiColor16 (5 bit R, 6 bit G, 5 bit B), format: gggrrrrrbbbbbggg
-        dc.w    4 +8+16    ;  8192 RGBFB_B5G5R5PC  HiColor15 (5 bit each), format: gggrrrrr0bbbbbbgg
+            dc.w      3                         ;  1    RGBFB_NONE      planar mode (the name is historical)
+            dc.w      3                         +32 ;+ 2    RGBFB_CLUT      palette mode, set colors when opening screen using tags or use SetRGB32/LoadRGB32(...)
+            dc.w      5                         ;  4    RGBFB_R8G8B8    TrueColor RGB (8 bit each)
+            dc.w      5                         +16+32 ;+ 8    RGBFB_B8G8R8    TrueColor BGR (8 bit each)
+            dc.w      4                         +16+32 ;+ 16   RGBFB_R5G6B5PC  HiColor16 (5 bit R, 6 bit G, 5 bit B), format: gggbbbbbrrrrrggg
+            dc.w      4                         +8       ;  32   RGBFB_R5G5B5PC  HiColor15 (5 bit each), format: gggbbbbb0rrrrrgg
+            dc.w      6                         ;  64   RGBFB_A8R8G8B8  4 Byte TrueColor ARGB (A unused alpha channel)
+            dc.w      6                         +16    ;  128  RGBFB_A8B8G8R8  4 Byte TrueColor ABGR (A unused alpha channel)
+            dc.w      6                         +32 ;+ 256  RGBFB_R8G8B8A8  4 Byte TrueColor RGBA (A unused alpha channel)
+            dc.w      6                         +16    ;  512  RGBFB_B8G8R8A8  4 Byte TrueColor BGRA (A unused alpha channel)
+            dc.w      4                         ;  1024 RGBFB_R5G6B5    HiColor16 (5 bit R, 6 bit G, 5 bit B), format: rrrrrggggggbbbbb
+            dc.w      4                         +8       ;  2048 RGBFB_R5G5B5    HiColor15 (5 bit each), format: 0rrrrrgggggbbbbb
+            dc.w      4                         ;  4096 RGBFB_B5G6R5PC  HiColor16 (5 bit R, 6 bit G, 5 bit B), format: gggrrrrrbbbbbggg
+            dc.w      4                         +8+16    ;  8192 RGBFB_B5G5R5PC  HiColor15 (5 bit each), format: gggrrrrr0bbbbbbgg
         
 ;------------------------------------------------------------------------------
 SetGC:
@@ -570,27 +578,27 @@ SetGC:
 
 ; For MiSTer, just set image size
 
-        move.l  a1,PSSO_BoardInfo_ModeInfo(a0)
-        movea.l PSSO_BoardInfo_RegisterBase(a0),a0
+            move.l    a1,PSSO_BoardInfo_ModeInfo(a0)
+            movea.l   PSSO_BoardInfo_RegisterBase(a0),a0
 
-        move.w  PSSO_ModeInfo_Width(a1),d0
-        moveq   #0,d1
-        move.b  PSSO_ModeInfo_Depth(a1),d1
-        addq.w  #7,d1
-        lsr.w   #3,d1
-        mulu.w  d1,d0
-        move.w  d0,REG_STRIDE(a0)
-        BUG     "RTG:BytesPerLine = %lx",d0
+            move.w    PSSO_ModeInfo_Width(a1),d0
+            moveq     #0,d1
+            move.b    PSSO_ModeInfo_Depth(a1),d1
+            addq.w    #7,d1
+            lsr.w     #3,d1
+            mulu.w    d1,d0
+            move.w    d0,REG_STRIDE(a0)
+            BUG       "RTG:BytesPerLine = %lx",d0
         
-        move.w  PSSO_ModeInfo_Width(a1),d0
-        move.w  d0,REG_HSIZE(a0)
-        BUG     "RTG:HSIZE = %lx",d0
+            move.w    PSSO_ModeInfo_Width(a1),d0
+            move.w    d0,REG_HSIZE(a0)
+            BUG       "RTG:HSIZE = %lx",d0
         
-        move.w  PSSO_ModeInfo_Height(a1),d0
-        move.w  d0,REG_VSIZE(a0)
-        BUG     "RTG:VSIZE = %lx",d0
+            move.w    PSSO_ModeInfo_Height(a1),d0
+            move.w    d0,REG_VSIZE(a0)
+            BUG       "RTG:VSIZE = %lx",d0
                 
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 SetPanning:
@@ -610,13 +618,13 @@ SetPanning:
 ;  these values you will have to calculate the LinearStartingAddress
 ;  fields of the CRTC registers.
 
-        movea.l PSSO_BoardInfo_RegisterBase(a0),a0
-        move.l  a1,d0
-        sub.l   #MEMORY_BASE,d0
-        add.l   #FB_BASE,d0
-        BUG     "RTG:ADDRESS = %lx",d0
-        move.l  d0,REG_ADDRESS(a0)
-        rts
+            movea.l   PSSO_BoardInfo_RegisterBase(a0),a0
+            move.l    a1,d0
+            sub.l     #MEMORY_BASE,d0
+            add.l     #FB_BASE,d0
+            BUG       "RTG:ADDRESS = %lx",d0
+            move.l    d0,REG_ADDRESS(a0)
+            rts
         
 ;------------------------------------------------------------------------------
 CalculateBytesPerRow:
@@ -627,56 +635,56 @@ CalculateBytesPerRow:
 ;  This function calculates the amount of bytes needed for a line of
 ;  "Width" pixels in the given RGBFormat.
 
-        cmpi.l  #16,d7
-        bcc.b   .exit
+            cmpi.l    #16,d7
+            bcc.b     .exit
 
-        move.w  .base(pc,d7.l*2),d1
-        jmp     .base(pc,d1.w)
+            move.w    .base(pc,d7.l*2),d1
+            jmp       .base(pc,d1.w)
 
 .base:
-        dc.w    .pp_1Bit-.base
-        dc.w    .pp_1Byte-.base
-        dc.w    .pp_3Bytes-.base
-        dc.w    .pp_3Bytes-.base
-        dc.w    .pp_2Bytes-.base
-        dc.w    .pp_2Bytes-.base
-        dc.w    .pp_4Bytes-.base
-        dc.w    .pp_4Bytes-.base
-        dc.w    .pp_4Bytes-.base
-        dc.w    .pp_4Bytes-.base
-        dc.w    .pp_2Bytes-.base
-        dc.w    .pp_2Bytes-.base
-        dc.w    .pp_2Bytes-.base
-        dc.w    .pp_2Bytes-.base
-        dc.w    .pp_2Bytes-.base
-        dc.w    .pp_1Byte-.base
+            dc.w      .pp_1Bit-.base
+            dc.w      .pp_1Byte-.base
+            dc.w      .pp_3Bytes-.base
+            dc.w      .pp_3Bytes-.base
+            dc.w      .pp_2Bytes-.base
+            dc.w      .pp_2Bytes-.base
+            dc.w      .pp_4Bytes-.base
+            dc.w      .pp_4Bytes-.base
+            dc.w      .pp_4Bytes-.base
+            dc.w      .pp_4Bytes-.base
+            dc.w      .pp_2Bytes-.base
+            dc.w      .pp_2Bytes-.base
+            dc.w      .pp_2Bytes-.base
+            dc.w      .pp_2Bytes-.base
+            dc.w      .pp_2Bytes-.base
+            dc.w      .pp_1Byte-.base
 
 .pp_4Bytes:
-        add.w   d0,d0
+            add.w     d0,d0
 .pp_2Bytes:
-        add.w   d0,d0
-        bra.b   .exit
+            add.w     d0,d0
+            bra.b     .exit
 
 .pp_3Bytes:
-        move.w  d0,d1
-        add.w   d0,d1
-        add.w   d1,d0
-        bra.b   .exit
+            move.w    d0,d1
+            add.w     d0,d1
+            add.w     d1,d0
+            bra.b     .exit
 
 .pp_1Bit:
-        lsr.w   #3,d0
+            lsr.w     #3,d0
 
 .pp_1Byte:
 
 .exit:
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 CalculateMemory:
 ;------------------------------------------------------------------------------
 
-        move.l  a1,d0
-        rts
+            move.l    a1,d0
+            rts
 
 ;------------------------------------------------------------------------------
 SetColorArray:
@@ -693,35 +701,35 @@ SetColorArray:
 
 ;       BUG     "SetColorArray ( %ld / %ld )",d0,d1
 
-        lea     PSSO_BoardInfo_CLUT(a0),a1
-        movea.l PSSO_BoardInfo_RegisterBase(a0),a0
+            lea       PSSO_BoardInfo_CLUT(a0),a1
+            movea.l   PSSO_BoardInfo_RegisterBase(a0),a0
 
-        lea     (a1,d0.w),a1
-        lea     (a1,d0.w*2),a1
-        adda.l  #REG_PALETTE,a0
-        lea     (a0,d0.w*4),a0
+            lea       (a1,d0.w),a1
+            lea       (a1,d0.w*2),a1
+            adda.l    #REG_PALETTE,a0
+            lea       (a0,d0.w*4),a0
 
-        bra.b   .sla_loop_end
+            bra.b     .sla_loop_end
 
 .sla_loop:
-        moveq   #0,d0
-        move.b  (a1)+,d0
-        lsl.w   #8,d0
-        move.b  (a1)+,d0
-        lsl.l   #8,d0
-        move.b  (a1)+,d0
+            moveq     #0,d0
+            move.b    (a1)+,d0
+            lsl.w     #8,d0
+            move.b    (a1)+,d0
+            lsl.l     #8,d0
+            move.b    (a1)+,d0
 
-        move.l  d0,(a0)+
-.sla_loop_end
-        dbra    d1,.sla_loop
+            move.l    d0,(a0)+
+.sla_loop_end:
+            dbra      d1,.sla_loop
 
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 SetDPMSLevel:
 ;------------------------------------------------------------------------------
 
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 SetDisplay:
@@ -732,47 +740,47 @@ SetDisplay:
 ;
 ;  NOTE: return the opposite of the state
 
-        BUG "SetDisplay %ld",d0
-        not.b   d0
-        andi.w  #1,d0
-        rts
+            BUG       "SetDisplay %ld",d0
+            not.b     d0
+            andi.w    #1,d0
+            rts
 
 ;------------------------------------------------------------------------------
 SetMemoryMode:
 ;------------------------------------------------------------------------------
 
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 SetWriteMask:
 ;------------------------------------------------------------------------------
 
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 SetReadPlane:
 ;------------------------------------------------------------------------------
 
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 SetClearMask:
 ;------------------------------------------------------------------------------
 
-        move.b  d0,PSSO_BoardInfo_ClearMask(a0)
-        rts
+            move.b    d0,PSSO_BoardInfo_ClearMask(a0)
+            rts
 
 ;------------------------------------------------------------------------------
 WaitVerticalSync:
 ;------------------------------------------------------------------------------
 ;  a0:  struct BoardInfo
 ;  This function waits for the next horizontal retrace.
-        BUG     "WaitVerticalSync"
+            BUG       "WaitVerticalSync"
 
 ; On minimig can simply use VPOSR for this
 
 .wait_done:
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 Reserved5:
@@ -783,14 +791,14 @@ Reserved5:
 ;       btst.b  #7,VDE_DisplayStatus(a0)        ;Vertical retrace
 ;       sne     d0
 ;       extb.l  d0
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 SetClock:
 ;------------------------------------------------------------------------------
 
 ;       MiSTer framebuffer : Not used
-        rts
+            rts
 
 ;------------------------------------------------------------------------------
 ResolvePixelClock:
@@ -802,15 +810,15 @@ ResolvePixelClock:
 
 ;       MiSTer framebuffer : Not used
 
-        move.l  #100000000,PSSO_ModeInfo_PixelClock(a1)
-        moveq   #1,d0
-        rts
+            move.l    #100000000,PSSO_ModeInfo_PixelClock(a1)
+            moveq     #1,d0
+            rts
 
 ;------------------------------------------------------------------------------
 GetPixelClock:
 ;------------------------------------------------------------------------------
-        move.l  #100000000,d0
-        rts
+            move.l    #100000000,d0
+            rts
 
 ;------------------------------------------------------------------------------
 SetInterrupt:
@@ -828,7 +836,7 @@ SetInterrupt:
 ;       move.w  #$0001,VDE_InterruptEnable(a1)
 ;       BUG     "VDE_InterruptEnable = $0001"
 
-.done:  rts
+.done:      rts
 
 ;.disable:
 ;       move.w  VDE_InterruptEnable(a1),d0
@@ -842,17 +850,245 @@ SetInterrupt:
 VBL_ISR:
 ;------------------------------------------------------------------------------
 
-        moveq   #0,d0
-        rts
+            moveq     #0,d0
+            rts
 
 ;------------------------------------------------------------------------------
 GetCompatibleFormats:
 ;------------------------------------------------------------------------------
 
-        moveq   #-1,d0
-        rts
+            moveq     #-1,d0
+            rts
+
+;------------------------------------------------------------------------------
+SetMMU:
+;------------------------------------------------------------------------------
+; ( addr:a0 size:d0 flags:d1 exec:a6 )
+; returns old flags in d0/d1
+; ( d0-d1/a0-a1 are scratch )
+
+MAPP_CACHEINHIBIT equ (1<<6)
+MAPP_COPYBACK equ     (1<<13)
+MAPP_IMPRECISE equ    (1<<21)
+MAPP_NONSERIALIZED equ (1<<29)
+
+_LVOGetMapping EQU    -36
+_LVOReleaseMapping EQU -42
+_LVOGetPageSize EQU   -48
+_LVOGetMMUType EQU    -54
+_LVOLockMMUContext EQU -72
+_LVOUnlockMMUContext EQU -78
+_LVOSetPropertiesA EQU -84
+_LVOGetPropertiesA EQU -90
+_LVORebuildTree EQU   -96
+_LVOSuperContext EQU  -144
+_LVODefaultContext EQU -150
+_LVOLockContextList EQU -210
+_LVOUnlockContextList EQU -216
+_LVOSetPropertyList EQU -228
+_LVORebuildTreesA EQU -360
+
+TAG_DONE    EQU       0
+
+            movem.l   d2-d7/a2-a5,-(sp)
+
+            movem.l   d0/a0,-(sp)               ; (sp),4(sp) = size,addr
+            move.l    d1,a3                     ; a3 = flags
+
+            ; Only attempt mmu.library if it's already loaded (via SetPatch)
+            FORBID
+
+            lea       LibList(a6),a0
+.retry:
+            lea       .mmuName(pc),a1
+            CALLLIB   _LVOFindName
+
+            move.l    d0,d2
+            beq.b     .done
+            movea.l   d0,a0
+
+            cmp.w     #46,LIB_VERSION(a0)
+            blt.b     .retry
+
+.done:
+            PERMIT
+
+            tst.l     d2
+            bne.b     .mmulib_ok
+
+            pea       .exit(pc)
+            bra.w     .failed
+
+            ; Verify MMU presence
+.mmulib_ok:
+            move.l    d2,a6
+            CALLLIB   _LVOGetMMUType
+            tst.b     d0
+            bne.b     .mmu_ok
+
+            pea       .nommu(pc)
+            bra.w     .failed
+
+.mmu_ok:
+            sub.b     #"0",d0
+
+            ; Get contexts
+            CALLLIB   _LVODefaultContext
+            movea.l   d0,a5                     ; a5 = ctx
+            move.l    d0,a0
+            CALLLIB   _LVOSuperContext
+            movea.l   d0,a4                     ; a4 = sctx
+
+            move.l    a5,d0
+            CALLLIB   _LVOGetPageSize
+            move.l    d0,d7                     ; d7 = pagesize
+
+            move.l    a4,d0
+            CALLLIB   _LVOGetPageSize
+            cmp.l     d0,d7
+            beq.b     .page_ok
+
+            pea       .nommu(pc)
+            bra.w     .failed
+
+.page_ok:
+            ; adjust address and size to match page size
+            movem.l   (sp),d0/d1
+
+            move.l    d7,d6
+            subq.l    #1,d6
+            not.l     d6
+            move.l    d1,d2
+            and.l     d6,d1
+            sub.l     d1,d2
+            add.l     d2,d0
+            add.l     d7,d0
+            and.l     d6,d0
+
+            movem.l   d0/d1,(sp)                ; (sp),4(sp) = adjusted size/addr
+
+            ; Lock contexts
+            CALLLIB   _LVOLockContextList
+            movea.l   a5,a0
+            CALLLIB   _LVOLockMMUContext        (ctx)
+
+            movea.l   a4,a0
+            CALLLIB   _LVOLockMMUContext        (sctx)
+
+            ; Get mapping
+            move.l    a5,a0
+            CALLLIB   _LVOGetMapping            (ctx)
+            move.l    d0,d5                     ; d5 = ctx mapping
+            bne.b     .ctx_ok
+
+            pea       .unlock(pc)
+            bra.w     .failed
+
+.ctx_ok:    move.l    a4,a0
+            CALLLIB   _LVOGetMapping            (sctx)
+            move.l    d0,d4                     ; d4 = ctx mapping
+            bne.b     .sctx_ok
+
+            pea       .release(pc)
+            bra.w     .failed
+
+.sctx_ok:   movem.l   (sp),d6/d7                ; d6 = size, d7 = addr
+
+            move.l    a5,a0
+            move.l    d7,a1
+            lea       .tagDone,a2
+            CALLLIB   _LVOGetPropertiesA        (ctx,from,TAG_DONE)
+            move.l    d0,(sp)                   ; (sp) = old flags (ctx)
+
+            move.l    a5,a0
+            move.l    a3,d1
+            move.l    #MAPP_CACHEINHIBIT|MAPP_IMPRECISE|MAPP_NONSERIALIZED|MAPP_COPYBACK,d2
+            move.l    d6,d0
+            move.l    d7,a1
+            lea       .tagDone(pc),a2
+            CALLLIB   _LVOSetPropertiesA        (ctx,flags,mask,from,size,TAG_DONE)
+            tst.b     d0
+            beq.b     .revert
+
+            move.l    a4,a0
+            move.l    d7,a1
+            movem.l   (sp),d0/a1
+            lea       .tagDone,a2
+            CALLLIB   _LVOGetPropertiesA        (sctx,from,TAG_DONE)
+            move.l    d0,4(sp)                  ; 4(sp) = old flags (sctx)
+
+            move.l    a4,a0
+            move.l    a3,d1
+            move.l    #MAPP_CACHEINHIBIT|MAPP_IMPRECISE|MAPP_NONSERIALIZED|MAPP_COPYBACK,d2
+            move.l    d6,d0
+            move.l    d7,a1
+            lea       .tagDone(pc),a2
+            CALLLIB   _LVOSetPropertiesA        (sctx,flags,mask,from,size,TAG_DONE)
+            tst.b     d0
+            beq.b     .revert
+
+            sub.w     #4*3,sp
+            move.l    a5,(sp)
+            move.l    a4,4(sp)
+            clr.l     8(sp)
+            move.l    sp,a0
+            CALLLIB   _LVORebuildTreesA         (ctx,sctx,NULL)
+            add.w     #4*3,sp
+            tst.b     d0
+            bne.b     .success
+
+.revert:
+            pea       .cleanup(pc)
+            move.l    a5,a0
+            move.l    d5,a1
+            CALLLIB   _LVOSetPropertyList       (ctx,ctxl)
+            move.l    a4,a0
+            move.l    d4,a1
+            CALLLIB   _LVOSetPropertyList       (sctx,sctxl)
+
+.failed:
+            moveq.l   #-1,d0
+            move.l    d0,4(sp)                  ; set return values
+            move.l    d0,8(sp)
+            rts
+
+.success:
+
+.cleanup:
+            move.l    a4,a0
+            move.l    d4,a1
+            CALLLIB   _LVOReleaseMapping        (sctx,sctxl)
+
+.release:
+            move.l    a5,a0
+            move.l    d5,a1
+            CALLLIB   _LVOReleaseMapping        (ctx,ctxl)
+
+.unlock:
+
+            ; Unlock contexts
+            movea.l   a4,a0
+            CALLLIB   _LVOUnlockMMUContext      (sctx)
+            movea.l   a5,a0
+            CALLLIB   _LVOUnlockMMUContext      (ctx)
+            CALLLIB   _LVOUnlockContextList
+
+.nommu:
+
+            move.l    a6,a1
+            move.l    4.w,a6
+            CALLLIB   _LVOCloseLibrary
+
+.exit:
+            movem.l   (sp)+,d0/d1
+            movem.l   (sp)+,d2-d7/a2-a5
+            rts
+
+.mmuName:   dc.b      "mmu.library",0
+            even
+.tagDone:   dc.l      TAG_DONE
 
 ;==============================================================================
 
 ProgEnd:
-        end
+            end

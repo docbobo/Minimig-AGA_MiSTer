@@ -9,7 +9,7 @@ set(TARGET MiSTer.card)
 set(CMAKE_ASM_COMPILER /opt/amiga/bin/vasmm68k_mot)
 set(CMAKE_LINKER /opt/amiga/bin/vlink)
 
-set(CMAKE_ASM_FLAGS "-quiet -Iinclude -Fhunk -phxass -opt-fconst -nowarn=62")
+set(CMAKE_ASM_FLAGS "-quiet -Iinclude -Fhunk -opt-fconst")
 set(CMAKE_ASM_FLAGS_DEBUG "${CMAKE_ASM_FLAGS} -Ddebug")
 set(CMAKE_ASM_FLAGS_RELEASE "${CMAKE_ASM_FLAGS} -nosym")
 
@@ -21,8 +21,9 @@ set(SOURCES
   MiSTer.card.asm 
 )
 
-# set(CMAKE_ASM_LINK_EXECUTABLE "${CMAKE_LINKER} ${CMAKE_LINKER_FLAGS} <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
-
+# If you define the Debug Symbol make sure the monitor file is in
+# sys:storage/monitors - debug output seems to crash the system if
+# it happens during startup.
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_ASM_COMPILER> ${CMAKE_ASM_FLAGS_DEBUG} -o <OBJECT> <SOURCE>")
   set(CMAKE_ASM_LINK_EXECUTABLE "${CMAKE_LINKER} ${CMAKE_EXE_LINKER_FLAGS_DEBUG} <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
